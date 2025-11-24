@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "5900:5900"
+      - "6080:6080"
+    volumes:
+      - ./downloads:/app/downloads
+    env_file:
+      - .env
+    environment:
+      # Variáveis de ambiente para o Playwright (já definidas no Dockerfile, mas podem ser sobrescritas aqui)
+      - HEADLESS=false
+      - DOWNLOADS_DIR=/app/downloads
+      # Credenciais do LinkedIn e Anti-Captcha (se não forem passadas no build da imagem, podem ser definidas aqui)
+      # - LINKEDIN_EMAIL=${LINKEDIN_EMAIL}
+      # - LINKEDIN_PASSWORD=${LINKEDIN_PASSWORD}
+      # - ANTI_CAPTCHA_KEY=${ANTI_CAPTCHA_KEY}
+      # Variáveis para o script Python se conectar ao PostgreSQL
+      - DB_HOST=db
+      - DB_NAME=${POSTGRES_DB}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+    depends_on:
+      - db
+    # O comando padrão do Dockerfile será executado, mas você pode sobrescrevê-lo aqui se precisar
+    # command: ["python", "-m", "src.main", "--storage", "/app/storage_state.json"]
+
+  db:
+    image: postgres:13-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432" # Porta padrão do PostgreSQL
+
+volumes:
+  db_data:
