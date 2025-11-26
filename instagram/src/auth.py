@@ -108,81 +108,7 @@ def create_context(playwright: Playwright, storage_path: str):
         return browser, context
 
     try:
-        u = page.locator('input[name="username"]').first
-        p = page.locator('input[name="password"]').first
-        if u.count() == 0:
-            u = page.locator('input[aria-label*="utilizador"], input[aria-label*="username"], input[aria-label*="e-mail"]').first
-        if p.count() == 0:
-            p = page.locator('input[aria-label*="Palavra"], input[aria-label*="password"]').first
-        try:
-            u.wait_for(state="visible", timeout=20000)
-            p.wait_for(state="visible", timeout=20000)
-        except Exception:
-            pass
-        try:
-            page.wait_for_load_state("domcontentloaded")
-        except Exception:
-            pass
-        try:
-            page.wait_for_load_state("networkidle")
-        except Exception:
-            pass
-        try:
-            ready = (u.is_visible() and p.is_visible())
-            print(json.dumps({"ig_fields_ready": ready}))
-        except Exception:
-            pass
-        try:
-            u.scroll_into_view_if_needed()
-            p.scroll_into_view_if_needed()
-        except Exception:
-            pass
-        try:
-            u.click()
-        except Exception:
-            pass
-        try:
-            u.fill(email)
-        except Exception:
-            try:
-                u.press("Control+A")
-                u.type(email)
-            except Exception:
-                try:
-                    u.evaluate('el => { el.value = ""; el.dispatchEvent(new Event("input",{bubbles:true})); el.value = "%s"; el.dispatchEvent(new Event("input",{bubbles:true})); el.dispatchEvent(new Event("change",{bubbles:true})); }' % email)
-                except Exception:
-                    pass
-        try:
-            print(json.dumps({"ig_fill_username": True}))
-        except Exception:
-            pass
-        try:
-            p.click()
-        except Exception:
-            pass
-        try:
-            p.fill(password)
-        except Exception:
-            try:
-                p.press("Control+A")
-                p.type(password)
-            except Exception:
-                try:
-                    p.evaluate('el => { el.value = ""; el.dispatchEvent(new Event("input",{bubbles:true})); el.value = "%s"; el.dispatchEvent(new Event("input",{bubbles:true})); el.dispatchEvent(new Event("change",{bubbles:true})); }' % password)
-                except Exception:
-                    pass
-        try:
-            print(json.dumps({"ig_fill_password": True}))
-        except Exception:
-            pass
-        try:
-            page.keyboard.press("Tab")
-        except Exception:
-            pass
-    except Exception:
-        pass
-    try:
-        page.click('button[type="submit"]')
+        _perform_login(page, email, password)
     except Exception:
         pass
 
@@ -214,3 +140,105 @@ def _setup_navigation_guards(context: BrowserContext, main_page):
         except Exception:
             pass
     context.on("page", on_page)
+
+def _get_login_locators(page):
+    u = page.locator('input[name="username"]').first
+    p = page.locator('input[name="password"]').first
+    if u.count() == 0:
+        u = page.locator('input[aria-label*="utilizador"], input[aria-label*="username"], input[aria-label*="e-mail"]').first
+    if p.count() == 0:
+        p = page.locator('input[aria-label*="Palavra"], input[aria-label*="password"]').first
+    b = page.locator('button[type="submit"]').first
+    if b.count() == 0:
+        b = page.get_by_role('button', name=re.compile(r'Entrar|Iniciar Sessão', re.I)).first
+    return u, p, b
+
+def _fill_input(loc, text):
+    try:
+        loc.fill(text)
+        return True
+    except Exception:
+        try:
+            loc.press("Control+A")
+            loc.type(text)
+            return True
+        except Exception:
+            try:
+                loc.evaluate('el => { el.value = ""; el.dispatchEvent(new Event("input",{bubbles:true})); el.value = "%s"; el.dispatchEvent(new Event("input",{bubbles:true})); el.dispatchEvent(new Event("change",{bubbles:true})); }' % text)
+                return True
+            except Exception:
+                return False
+
+def _perform_login(page, email, password):
+    attempts = 0
+    while attempts < 5:
+        try:
+            page.wait_for_load_state("domcontentloaded")
+        except Exception:
+            pass
+        try:
+            page.wait_for_load_state("networkidle")
+        except Exception:
+            pass
+        u, p, b = _get_login_locators(page)
+        try:
+            u.wait_for(state="visible", timeout=10000)
+            p.wait_for(state="visible", timeout=10000)
+        except Exception:
+            attempts += 1
+            continue
+        try:
+            u.scroll_into_view_if_needed(); p.scroll_into_view_if_needed()
+        except Exception:
+            pass
+        try:
+            u.click()
+        except Exception:
+            pass
+        ok_u = _fill_input(u, email)
+        try:
+            print(json.dumps({"ig_fill_username": ok_u}))
+        except Exception:
+            pass
+        try:
+            p.click()
+        except Exception:
+            pass
+        ok_p = _fill_input(p, password)
+        try:
+            print(json.dumps({"ig_fill_password": ok_p}))
+        except Exception:
+            pass
+        try:
+            val_u = u.input_value()
+            val_p = p.input_value()
+            ready = bool(val_u) and bool(val_p)
+            print(json.dumps({"ig_inputs_ready": ready}))
+        except Exception:
+            ready = True
+        try:
+            if not b.is_enabled():
+                b.evaluate('el => { try { el.removeAttribute("disabled"); } catch(e){} }')
+        except Exception:
+            pass
+        clicked = False
+        try:
+            b.click()
+            clicked = True
+        except Exception:
+            try:
+                page.keyboard.press("Enter")
+                clicked = True
+            except Exception:
+                pass
+        try:
+            print(json.dumps({"ig_submit_clicked": clicked}))
+        except Exception:
+            pass
+        try:
+            page.wait_for_url(re.compile(r"instagram\.com/"), timeout=15000)
+            return
+        except Exception:
+            attempts += 1
+            continue
+    return
