@@ -49,9 +49,9 @@ def main():
                     base_name = f"linkedin_{seg}_{s.replace('/', '-')}_{e.replace('/', '-')}"
                     click_export_confirm(page, base_name)
                 try:
-                    downloads_dir = os.environ.get("DOWNLOADS_DIR") or "/app/downloads"
+                    downloads_dir = os.environ.get("DOWNLOADS_DIR") or "/app/linkedin/downloads"
                 except Exception:
-                    downloads_dir = "/app/downloads"
+                    downloads_dir = "/app/linkedin/downloads"
                 try:
                     ingest_downloads(downloads_dir)
                 except Exception:

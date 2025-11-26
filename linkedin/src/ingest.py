@@ -614,5 +614,5 @@ def ingest_downloads(downloads_dir):
     conn.close()
 
 if __name__ == "__main__":
-    dd = _get_env("DOWNLOADS_DIR", "/app/downloads")
+    dd = _get_env("DOWNLOADS_DIR", "/app/linkedin/downloads")
     ingest_downloads(dd)

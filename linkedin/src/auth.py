@@ -92,9 +92,9 @@ def create_context(playwright: Playwright, storage_path: str):
         context.set_default_timeout(60000)
         context.set_default_navigation_timeout(60000)
         try:
-            downloads_dir = os.environ.get("DOWNLOADS_DIR") or "/app/downloads"
+            downloads_dir = os.environ.get("DOWNLOADS_DIR") or "/app/linkedin/downloads"
         except Exception:
-            downloads_dir = "/app/downloads"
+            downloads_dir = "/app/linkedin/downloads"
         try:
             os.makedirs(downloads_dir, exist_ok=True)
         except Exception:
@@ -120,9 +120,9 @@ def create_context(playwright: Playwright, storage_path: str):
     context.set_default_timeout(60000)
     context.set_default_navigation_timeout(60000)
     try:
-        downloads_dir = os.environ.get("DOWNLOADS_DIR") or "/app/downloads"
+        downloads_dir = os.environ.get("DOWNLOADS_DIR") or "/app/linkedin/downloads"
     except Exception:
-        downloads_dir = "/app/downloads"
+        downloads_dir = "/app/linkedin/downloads"
     try:
         os.makedirs(downloads_dir, exist_ok=True)
     except Exception:

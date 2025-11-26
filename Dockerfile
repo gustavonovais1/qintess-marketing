@@ -6,14 +6,15 @@ WORKDIR /app
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY src ./src
+COPY linkedin/src ./linkedin/src
+COPY instagram/src ./instagram/src
 
 COPY start.sh ./start.sh
 RUN chmod +x ./start.sh
 
 ENV HEADLESS=false
-ENV DOWNLOADS_DIR=/app/downloads
-VOLUME /app/downloads
+ENV DOWNLOADS_DIR=/app/linkedin/downloads
+VOLUME /app/linkedin/downloads
 
 EXPOSE 5900 6080
 ENTRYPOINT ["/app/start.sh"]

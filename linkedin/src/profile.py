@@ -401,9 +401,9 @@ def click_export_confirm(page: Page, custom_basename: str | None = None):
                 except Exception:
                     pass
                 try:
-                    downloads_dir = os.environ.get("DOWNLOADS_DIR") or "/app/downloads"
+                    downloads_dir = os.environ.get("DOWNLOADS_DIR") or "/app/linkedin/downloads"
                 except Exception:
-                    downloads_dir = "/app/downloads"
+                    downloads_dir = "/app/linkedin/downloads"
                 try:
                     os.makedirs(downloads_dir, exist_ok=True)
                 except Exception:
@@ -454,9 +454,9 @@ def click_export_confirm(page: Page, custom_basename: str | None = None):
                 except Exception:
                     pass
                 try:
-                    downloads_dir = os.environ.get("DOWNLOADS_DIR") or "/app/downloads"
+                    downloads_dir = os.environ.get("DOWNLOADS_DIR") or "/app/linkedin/downloads"
                 except Exception:
-                    downloads_dir = "/app/downloads"
+                    downloads_dir = "/app/linkedin/downloads"
                 try:
                     os.makedirs(downloads_dir, exist_ok=True)
                 except Exception:
@@ -506,9 +506,9 @@ def click_export_confirm(page: Page, custom_basename: str | None = None):
         except Exception:
             pass
         try:
-            downloads_dir = os.environ.get("DOWNLOADS_DIR") or "/app/downloads"
+            downloads_dir = os.environ.get("DOWNLOADS_DIR") or "/app/linkedin/downloads"
         except Exception:
-            downloads_dir = "/app/downloads"
+            downloads_dir = "/app/linkedin/downloads"
         try:
             os.makedirs(downloads_dir, exist_ok=True)
         except Exception:
@@ -558,9 +558,9 @@ def click_export_confirm(page: Page, custom_basename: str | None = None):
             except Exception:
                 pass
             try:
-                downloads_dir = os.environ.get("DOWNLOADS_DIR") or "/app/downloads"
+                downloads_dir = os.environ.get("DOWNLOADS_DIR") or "/app/linkedin/downloads"
             except Exception:
-                downloads_dir = "/app/downloads"
+                downloads_dir = "/app/linkedin/downloads"
             try:
                 os.makedirs(downloads_dir, exist_ok=True)
             except Exception:
