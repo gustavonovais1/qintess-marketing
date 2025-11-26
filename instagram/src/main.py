@@ -6,7 +6,8 @@ from .auth import create_context
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--storage", default="instagram_storage.json")
+    # Salva o storage_state dentro da pasta instagram por padrão
+    parser.add_argument("--storage", default="instagram/instagram_storage.json")
     parser.add_argument("--stay-open", action="store_true")
     args = parser.parse_args()
     with sync_playwright() as p:

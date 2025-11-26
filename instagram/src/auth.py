@@ -3,8 +3,6 @@ import re
 import json
 from playwright.sync_api import Playwright, BrowserContext
 
-INSIGHTS_URL = "https://www.instagram.com/accounts/insights/?timeframe=30"
-
 def create_context(playwright: Playwright, storage_path: str):
     headless_env = os.environ.get("HEADLESS", "true").lower()
     headless = headless_env not in ("false", "0", "no")
@@ -90,30 +88,31 @@ def create_context(playwright: Playwright, storage_path: str):
         """)
     except Exception:
         pass
-    try:
-        def popup_guard(p):
-            try:
-                p.goto(INSIGHTS_URL)
-                try:
-                    p.bring_to_front()
-                except Exception:
-                    pass
-                try:
-                    print(json.dumps({"ig_popup_redirected": True, "target": INSIGHTS_URL}))
-                except Exception:
-                    pass
-            except Exception:
-                try:
-                    p.close()
-                except Exception:
-                    pass
-        page.on("popup", popup_guard)
-    except Exception:
-        pass
-    try:
-        _setup_navigation_guards(context, page)
-    except Exception:
-        pass
+    # Desabilita guards agressivos de popup/navegação para não interferir no fluxo de login
+    # try:
+    #     def popup_guard(p):
+    #         try:
+    #             p.goto(INSIGHTS_URL)
+    #             try:
+    #                 p.bring_to_front()
+    #             except Exception:
+    #                 pass
+    #             try:
+    #                 print(json.dumps({"ig_popup_redirected": True, "target": INSIGHTS_URL}))
+    #             except Exception:
+    #                 pass
+    #         except Exception:
+    #             try:
+    #                 p.close()
+    #             except Exception:
+    #                 pass
+    #     page.on("popup", popup_guard)
+    # except Exception:
+    #     pass
+    # try:
+    #     _setup_navigation_guards(context, page)
+    # except Exception:
+    #     pass
 
     try:
         page.goto("https://www.instagram.com/accounts/login/")
@@ -164,40 +163,47 @@ def create_context(playwright: Playwright, storage_path: str):
     except Exception:
         pass
 
+    # Após o login, escolhe a melhor aba/página para continuar (sem forçar redirect nem fechar abas)
     try:
-        insights_page = None
+        main_page = None
         for p in list(context.pages):
             try:
-                if p == page:
-                    continue
-                u = p.url
-                if "accounts/login" in u:
-                    try:
-                        p.close()
-                    except Exception:
-                        pass
-                elif "instagram.com" in u or u == "about:blank":
-                    try:
-                        p.goto(INSIGHTS_URL)
-                        insights_page = p
-                    except Exception:
-                        pass
-                    try:
-                        p.bring_to_front()
-                    except Exception:
-                        pass
-                else:
-                    try:
-                        p.close()
-                    except Exception:
-                        pass
+                url = p.url
+            except Exception:
+                continue
+            # Preferir uma página logada do Instagram que não seja a tela de login
+            try:
+                if "instagram.com" in url and "accounts/login" not in url:
+                    main_page = p
+                    break
             except Exception:
                 pass
+        if not main_page:
+            try:
+                main_page = context.pages[-1]
+            except Exception:
+                main_page = page
+
+        # Fecha todas as outras abas/páginas para evitar ficar "preso" em segunda aba
         try:
-            (insights_page or page).bring_to_front()
+            for other in list(context.pages):
+                if other is main_page:
+                    continue
+                try:
+                    other.close()
+                except Exception:
+                    pass
         except Exception:
             pass
-        context.storage_state(path=storage_path)
+
+        try:
+            main_page.bring_to_front()
+        except Exception:
+            pass
+        try:
+            context.storage_state(path=storage_path)
+        except Exception:
+            pass
     except Exception:
         pass
 
@@ -216,25 +222,7 @@ def _setup_navigation_guards(context: BrowserContext, main_page):
                             pass
                     else:
                         try:
-                            if not url or url == "about:blank" or "instagram.com" in url:
-                                p.goto(INSIGHTS_URL)
-                                try:
-                                    p.wait_for_url(re.compile(r"accounts/insights"), timeout=15000)
-                                except Exception:
-                                    pass
-                                try:
-                                    p.bring_to_front()
-                                except Exception:
-                                    pass
-                                try:
-                                    print(json.dumps({"ig_newtab_redirected": True, "target": INSIGHTS_URL}))
-                                except Exception:
-                                    pass
-                            else:
-                                try:
-                                    main_page.bring_to_front()
-                                except Exception:
-                                    pass
+                            main_page.bring_to_front()
                         except Exception:
                             pass
                 except Exception:
