@@ -3,13 +3,19 @@ import re
 import json
 from playwright.sync_api import Playwright, BrowserContext
 
+INSIGHTS_URL = "https://www.instagram.com/accounts/insights/?timeframe=30"
+
 def create_context(playwright: Playwright, storage_path: str):
     headless_env = os.environ.get("HEADLESS", "true").lower()
     headless = headless_env not in ("false", "0", "no")
 
     browser = playwright.chromium.launch(
         headless=headless,
-        args=["--disable-blink-features=AutomationControlled"]
+        args=[
+            "--disable-blink-features=AutomationControlled",
+            "--enable-webgl",
+            "--ignore-gpu-blacklist"
+        ]
     )
 
     video_dir = os.environ.get("RECORD_VIDEO_DIR")
@@ -20,7 +26,10 @@ def create_context(playwright: Playwright, storage_path: str):
             record_video_dir=video_dir if video_dir else None,
             viewport={"width": 1280, "height": 900},
             ignore_https_errors=True,
-            accept_downloads=True
+            accept_downloads=True,
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+            locale="pt-BR",
+            timezone_id="America/Sao_Paulo"
         )
         context.set_default_timeout(60000)
         context.set_default_navigation_timeout(60000)
@@ -37,10 +46,33 @@ def create_context(playwright: Playwright, storage_path: str):
         record_video_dir=video_dir if video_dir else None,
         viewport={"width": 1280, "height": 900},
         ignore_https_errors=True,
-        accept_downloads=True
+        accept_downloads=True,
+        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+        locale="pt-BR",
+        timezone_id="America/Sao_Paulo"
     )
     context.set_default_timeout(60000)
     context.set_default_navigation_timeout(60000)
+
+    try:
+        context.add_init_script(
+            """
+            document.addEventListener('click', (e) => {
+                const a = e.target && e.target.closest && e.target.closest('a');
+                if (a) { a.removeAttribute('target'); }
+            }, true);
+            """
+        )
+    except Exception:
+        pass
+    try:
+        context.add_init_script(
+            """
+            window.open = (url, target, features) => { if (url) { window.location.href = url; } return null; };
+            """
+        )
+    except Exception:
+        pass
 
     page = context.new_page()
     try:
@@ -61,9 +93,20 @@ def create_context(playwright: Playwright, storage_path: str):
     try:
         def popup_guard(p):
             try:
-                p.close()
+                p.goto(INSIGHTS_URL)
+                try:
+                    p.bring_to_front()
+                except Exception:
+                    pass
+                try:
+                    print(json.dumps({"ig_popup_redirected": True, "target": INSIGHTS_URL}))
+                except Exception:
+                    pass
             except Exception:
-                pass
+                try:
+                    p.close()
+                except Exception:
+                    pass
         page.on("popup", popup_guard)
     except Exception:
         pass
@@ -122,6 +165,38 @@ def create_context(playwright: Playwright, storage_path: str):
         pass
 
     try:
+        insights_page = None
+        for p in list(context.pages):
+            try:
+                if p == page:
+                    continue
+                u = p.url
+                if "accounts/login" in u:
+                    try:
+                        p.close()
+                    except Exception:
+                        pass
+                elif "instagram.com" in u or u == "about:blank":
+                    try:
+                        p.goto(INSIGHTS_URL)
+                        insights_page = p
+                    except Exception:
+                        pass
+                    try:
+                        p.bring_to_front()
+                    except Exception:
+                        pass
+                else:
+                    try:
+                        p.close()
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+        try:
+            (insights_page or page).bring_to_front()
+        except Exception:
+            pass
         context.storage_state(path=storage_path)
     except Exception:
         pass
@@ -132,9 +207,36 @@ def _setup_navigation_guards(context: BrowserContext, main_page):
     def on_page(p):
         try:
             url = p.url
-            if p != main_page and "instagram.com/accounts/login" in url:
+            if p != main_page:
                 try:
-                    p.close()
+                    if "accounts/login" in url:
+                        try:
+                            p.close()
+                        except Exception:
+                            pass
+                    else:
+                        try:
+                            if not url or url == "about:blank" or "instagram.com" in url:
+                                p.goto(INSIGHTS_URL)
+                                try:
+                                    p.wait_for_url(re.compile(r"accounts/insights"), timeout=15000)
+                                except Exception:
+                                    pass
+                                try:
+                                    p.bring_to_front()
+                                except Exception:
+                                    pass
+                                try:
+                                    print(json.dumps({"ig_newtab_redirected": True, "target": INSIGHTS_URL}))
+                                except Exception:
+                                    pass
+                            else:
+                                try:
+                                    main_page.bring_to_front()
+                                except Exception:
+                                    pass
+                        except Exception:
+                            pass
                 except Exception:
                     pass
         except Exception:
@@ -160,7 +262,7 @@ def _fill_input(loc, text):
     except Exception:
         try:
             loc.press("Control+A")
-            loc.type(text)
+            loc.type(text, delay=50)
             return True
         except Exception:
             try:
@@ -178,6 +280,10 @@ def _perform_login(page, email, password):
             pass
         try:
             page.wait_for_load_state("networkidle")
+        except Exception:
+            pass
+        try:
+            _ensure_login_form(page)
         except Exception:
             pass
         u, p, b = _get_login_locators(page)
@@ -237,8 +343,35 @@ def _perform_login(page, email, password):
             pass
         try:
             page.wait_for_url(re.compile(r"instagram\.com/"), timeout=15000)
+            try:
+                page.bring_to_front()
+            except Exception:
+                pass
             return
         except Exception:
             attempts += 1
             continue
     return
+
+def _ensure_login_form(page):
+    try:
+        u = page.locator('input[name="username"]').first
+        p = page.locator('input[name="password"]').first
+        if u.count() > 0 and p.count() > 0:
+            return
+    except Exception:
+        pass
+    targets = ["https://www.instagram.com/accounts/login/", "https://www.instagram.com/"]
+    for url in targets:
+        try:
+            if page.url != url:
+                page.goto(url)
+        except Exception:
+            pass
+        try:
+            u = page.locator('input[name="username"]').first
+            p = page.locator('input[name="password"]').first
+            if u.count() > 0 and p.count() > 0:
+                return
+        except Exception:
+            pass
