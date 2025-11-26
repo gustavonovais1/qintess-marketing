@@ -8,7 +8,6 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY linkedin/src ./linkedin/src
 COPY instagram/src ./instagram/src
-COPY instagram_manual_login.py ./instagram_manual_login.py
 
 COPY start.sh ./start.sh
 RUN chmod +x ./start.sh
