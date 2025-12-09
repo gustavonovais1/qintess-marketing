@@ -7,7 +7,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY linkedin/src ./linkedin/src
-COPY instagram/src ./instagram/src
+COPY instagram ./instagram
 
 COPY start.sh ./start.sh
 RUN chmod +x ./start.sh
@@ -16,7 +16,7 @@ ENV HEADLESS=false
 ENV DOWNLOADS_DIR=/app/linkedin/downloads
 VOLUME /app/linkedin/downloads
 
-EXPOSE 5900 6080
+EXPOSE 5900 6080 8000
 ENTRYPOINT ["/app/start.sh"]
 
 ENV DEFAULT_COMPANY_HREF=/company/64618175/admin/
