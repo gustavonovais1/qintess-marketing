@@ -43,14 +43,18 @@ services:
     env_file:
       - .env
     environment:
-      - APP_MODULE=instagram.app
+      - APP_MODULE=instagram.main
       - META_GRAPH_BASE=${META_GRAPH_BASE}
-      - META_ACCESS_TOKEN=${META_ACCESS_TOKEN}
       - PAGE_ID=${PAGE_ID}
       - IG_ACCOUNT_ID=${IG_ACCOUNT_ID}
       - META_CLIENT_ID=${META_CLIENT_ID}
       - META_CLIENT_SECRET=${META_CLIENT_SECRET}
       - PORT=8000
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=5432
     command: []
     depends_on:
       - db

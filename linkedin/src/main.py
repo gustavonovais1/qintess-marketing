@@ -4,7 +4,7 @@ import os
 import json
 from playwright.sync_api import sync_playwright
 from .auth import create_context
-from .profile import fetch_profile_data, click_by_href, click_company_admin, click_company_contents, click_export, click_date_range, click_date_range_custom, fill_date_range_current_month, click_update, click_export_confirm, go_to_updates
+from .profile import fetch_profile_data, click_by_href, click_company_contents, click_export, click_date_range, click_date_range_custom, fill_date_range_current_month, click_update, click_export_confirm
 from .ingest import ingest_downloads
 
 def main():
