@@ -60,8 +60,6 @@ def main():
                     c_url = click_company_contents(page)
                     if c_url and page.url != c_url:
                         page.goto(c_url)
-                # if args.export:
-                #     click_export(page)
                 data = {"navigated_to": page.url}
             elif args.target_href:
                 url = click_by_href(page, args.target_href)

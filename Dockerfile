@@ -6,8 +6,8 @@ WORKDIR /app
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY linkedin/src ./linkedin/src
-COPY instagram ./instagram
+COPY . .
+ENV PYTHONPATH=/app
 
 COPY start.sh ./start.sh
 RUN chmod +x ./start.sh

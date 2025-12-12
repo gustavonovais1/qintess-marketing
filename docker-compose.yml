@@ -7,13 +7,13 @@ services:
       - "5900:5900"
       - "6080:6080"
     volumes:
-      - ./linkedin/downloads:/app/linkedin/downloads
+      - ./bot/linkedin/downloads:/app/linkedin/downloads
     env_file:
       - .env
     environment:
       - HEADLESS=false
       - DOWNLOADS_DIR=/app/linkedin/downloads
-      - APP_MODULE=linkedin.src.main
+      - APP_MODULE=bot.linkedin.src.main
       - DB_HOST=db
       - DB_NAME=${POSTGRES_DB}
       - DB_USER=${POSTGRES_USER}
@@ -21,29 +21,17 @@ services:
     command: ["--storage", "/app/linkedin_storage.json"]
     depends_on:
       - db
-    # O comando padrão do Dockerfile será executado, mas você pode sobrescrevê-lo aqui se precisar
-    # command: ["python", "-m", "src.main", "--storage", "/app/storage_state.json"]
-
-  db:
-    image: postgres:13-alpine
-    restart: always
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432" # Porta padrão do PostgreSQL
 
   instagram:
     build: .
     ports:
       - "8000:8000"
+      - "5900:5900"
+      - "6080:6080"
     env_file:
       - .env
     environment:
-      - APP_MODULE=instagram.main
+      - APP_MODULE=main
       - META_GRAPH_BASE=${META_GRAPH_BASE}
       - PAGE_ID=${PAGE_ID}
       - IG_ACCOUNT_ID=${IG_ACCOUNT_ID}
@@ -55,9 +43,25 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_PORT=5432
+      - HEADLESS=false
+      - DOWNLOADS_DIR=/app/linkedin/downloads
+    volumes:
+      - ./bot/linkedin/downloads:/app/linkedin/downloads
     command: []
     depends_on:
       - db
+
+  db:
+    image: postgres:13-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
 
 volumes:
   db_data:

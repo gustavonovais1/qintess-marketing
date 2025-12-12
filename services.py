@@ -3,7 +3,7 @@ import requests
 from datetime import datetime, timezone, timedelta
 from fastapi import HTTPException
 from .db import get_session
-from .models import InsightsProfile, InsightsPost, OAuthToken
+from .models.models_instagram import InsightsProfile, InsightsPost, OAuthToken
 
 def _active_token() -> str:
     s = get_session()
@@ -507,3 +507,18 @@ def exchange_token_service(fb_exchange_token: str):
     s.commit()
     s.close()
     return {"access_token": access_token, "expires_in": int(expires_in)}
+
+def start_linkedin_bot(segments: str | None = None):
+    import subprocess, sys
+    args = [sys.executable, "-m", "bot.linkedin.src.main"]
+    storage = "linkedin_storage.json"
+    args += ["--storage", storage]
+    env = os.environ.copy()
+    env["DEFAULT_SEGMENTS"] = segments or "updates,visitors,followers,competitors"
+    # Map DB_* expected by ingest to our POSTGRES_* envs
+    env["DB_HOST"] = env.get("POSTGRES_HOST") or env.get("DB_HOST") or "localhost"
+    env["DB_NAME"] = env.get("POSTGRES_DB") or env.get("DB_NAME") or "postgres"
+    env["DB_USER"] = env.get("POSTGRES_USER") or env.get("DB_USER") or "postgres"
+    env["DB_PASSWORD"] = env.get("POSTGRES_PASSWORD") or env.get("DB_PASSWORD") or ""
+    p = subprocess.Popen(args, env=env)
+    return {"pid": p.pid, "started": True}

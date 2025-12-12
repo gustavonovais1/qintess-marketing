@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Query
-from .services import media_list, get_profile, get_insights_profile, get_insights_posts, exchange_token_service
+from services import media_list, get_profile, get_insights_profile, get_insights_posts, exchange_token_service
 
 router = APIRouter()
 

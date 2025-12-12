@@ -1,7 +1,6 @@
 from fastapi import FastAPI
-from .api import router as api_router
-from .db import Base, engine
-from . import models
+from api.api import router as api_router
+from db import Base, engine
 
 app = FastAPI(
     title="Qintess Marketing API",
@@ -15,6 +14,7 @@ def main():
     import uvicorn
     Base.metadata.create_all(bind=engine)
     port = int(os.environ.get("PORT") or 8000)
-    uvicorn.run("instagram.main:app", host="0.0.0.0", port=port, log_level="info")
+    uvicorn.run("main:app", host="0.0.0.0", port=port, log_level="info")
+
 if __name__ == "__main__":
     main()

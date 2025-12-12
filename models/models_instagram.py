@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, BigInteger, Text, Float
 from sqlalchemy.sql import func
 from sqlalchemy.types import DateTime
-from .db import Base
+from db import Base
 
 class InsightsProfile(Base):
     __tablename__ = "insights_profile"
