@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from api.api import router as api_router
-from db import Base, engine
+from core.db import Base, engine
 
 app = FastAPI(
     title="Qintess Marketing API",

@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 def _dsn():
     host = os.environ.get("POSTGRES_HOST")
-    db = os.environ.get("POSTGRES_DB") 
+    db = os.environ.get("POSTGRES_DB")
     user = os.environ.get("POSTGRES_USER")
     password = os.environ.get("POSTGRES_PASSWORD")
     port = os.environ.get("POSTGRES_PORT")
@@ -20,3 +20,4 @@ def get_session():
 with engine.begin() as conn:
     conn.execute(text("CREATE SCHEMA IF NOT EXISTS instagram"))
     conn.execute(text("CREATE SCHEMA IF NOT EXISTS linkedin"))
+    conn.execute(text('CREATE SCHEMA IF NOT EXISTS "user"'))

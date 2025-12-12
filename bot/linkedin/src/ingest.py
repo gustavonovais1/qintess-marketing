@@ -3,7 +3,7 @@ import re
 import datetime
 import calendar
 import pandas as pd
-from db import Base, engine, get_session
+from core.db import Base, engine, get_session
 from models.models_linkedin import Competitor, Follower, Update as UpdateModel, Visitor
 
 def _get_env(name, default=None):
@@ -130,10 +130,18 @@ def _process_competitors(df, s, source_name: str):
         obj = s.get(Competitor, key)
         if obj is None:
             obj = Competitor(period=period, page=row.get("page"))
+            try:
+                obj.created_at = datetime.datetime.utcnow()
+            except Exception:
+                pass
         obj.total_followers = row.get("total_followers")
         obj.new_followers = row.get("new_followers")
         obj.total_post_engagements = row.get("total_post_engagements")
         obj.total_posts = row.get("total_posts")
+        try:
+            obj.updated_at = datetime.datetime.utcnow()
+        except Exception:
+            pass
         s.add(obj)
         cnt += 1
     s.commit()
@@ -161,10 +169,18 @@ def _process_followers(df, s):
         obj = s.get(Follower, row.get("date"))
         if obj is None:
             obj = Follower(date=row.get("date"))
+            try:
+                obj.created_at = datetime.datetime.utcnow()
+            except Exception:
+                pass
         obj.sponsored_followers = row.get("sponsored_followers")
         obj.organic_followers = row.get("organic_followers")
         obj.auto_invited_followers = row.get("auto_invited_followers")
         obj.total_followers = row.get("total_followers")
+        try:
+            obj.updated_at = datetime.datetime.utcnow()
+        except Exception:
+            pass
         s.add(obj)
         cnt += 1
     s.commit()
@@ -228,6 +244,10 @@ def _process_updates(df, s):
         obj = s.get(UpdateModel, row.get("date"))
         if obj is None:
             obj = UpdateModel(date=row.get("date"))
+            try:
+                obj.created_at = datetime.datetime.utcnow()
+            except Exception:
+                pass
         for k in [
             "impressions_organic",
             "impressions_sponsored",
@@ -250,6 +270,10 @@ def _process_updates(df, s):
             "engagement_rate_total",
         ]:
             setattr(obj, k, row.get(k))
+        try:
+            obj.updated_at = datetime.datetime.utcnow()
+        except Exception:
+            pass
         s.add(obj)
         cnt += 1
     s.commit()
@@ -320,6 +344,10 @@ def _process_visitors(df, s):
         obj = s.get(Visitor, row.get("date"))
         if obj is None:
             obj = Visitor(date=row.get("date"))
+            try:
+                obj.created_at = datetime.datetime.utcnow()
+            except Exception:
+                pass
         for k in [
             "overview_page_views_desktop",
             "overview_page_views_mobile",
@@ -347,6 +375,10 @@ def _process_visitors(df, s):
             "total_unique_visitors_total",
         ]:
             setattr(obj, k, row.get(k))
+        try:
+            obj.updated_at = datetime.datetime.utcnow()
+        except Exception:
+            pass
         s.add(obj)
         cnt += 1
     s.commit()

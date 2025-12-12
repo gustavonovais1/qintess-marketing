@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Text, Integer, Date, Numeric, UniqueConstraint
-from db import Base
+from sqlalchemy import Column, Text, Integer, Date, Numeric, UniqueConstraint, DateTime
+from core.db import Base
 
 
 class Competitor(Base):
@@ -15,6 +15,8 @@ class Competitor(Base):
     new_followers = Column(Integer)
     total_post_engagements = Column(Integer)
     total_posts = Column(Integer)
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
 
 
 class Follower(Base):
@@ -28,6 +30,8 @@ class Follower(Base):
     organic_followers = Column(Integer)
     auto_invited_followers = Column(Integer)
     total_followers = Column(Integer)
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
 
 
 class Update(Base):
@@ -56,6 +60,8 @@ class Update(Base):
     engagement_rate_organic = Column(Numeric(10, 4))
     engagement_rate_sponsored = Column(Numeric(10, 4))
     engagement_rate_total = Column(Numeric(10, 4))
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
 
 
 class Visitor(Base):
@@ -89,3 +95,5 @@ class Visitor(Base):
     total_unique_visitors_desktop = Column(Integer)
     total_unique_visitors_mobile = Column(Integer)
     total_unique_visitors_total = Column(Integer)
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
