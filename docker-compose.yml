@@ -45,8 +45,10 @@ services:
       - POSTGRES_PORT=5432
       - HEADLESS=false
       - DOWNLOADS_DIR=/app/linkedin/downloads
+      - GOOGLE_APPLICATION_CREDENTIALS=/secrets/ga4.json
     volumes:
       - ./bot/linkedin/downloads:/app/linkedin/downloads
+      - ./ga4-service-account.json:/secrets/ga4.json:ro
     command: []
     depends_on:
       - db

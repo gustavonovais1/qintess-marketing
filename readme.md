@@ -63,6 +63,60 @@ Principais endpoints:
 - `GET /ig/insights/posts` — métricas por mídia (`api\\endpoints\\instagram.py:21-32`)
 - `POST /ll/start?segments=updates,visitors,...` — inicia bot do LinkedIn (`api\\endpoints\\linkedin.py:6-8`)
 
+## Google Analytics (GA4)
+- Prefixo: `/ga`. Endpoints sob `/ga/analytics/*` (autenticados).
+- Variável de ambiente obrigatória: `GA4_PROPERTY_ID`.
+- SDK: `google-analytics-data==0.18.0`.
+- Endpoints principais:
+  - `GET /ga/analytics/engagement`
+    - `metrics`: `engagedSessions,engagementRate,averageSessionDuration,userEngagementDuration,eventsPerSession,sessionKeyEventRate,userKeyEventRate,scrolledUsers`
+    - `dimensions`: `date,deviceCategory,country`
+  - `GET /ga/analytics/users`
+    - `metrics`: `activeUsers,newUsers,totalUsers,active1DayUsers,active7DayUsers,active28DayUsers,dauPerMau,dauPerWau,wauPerMau`
+    - `dimensions`: `date,country,deviceCategory`
+  - `GET /ga/analytics/events`
+    - `metrics`: `eventCount,eventCountPerUser,eventValue,keyEvents`
+    - `dimensions`: `date,eventName,pagePath`
+  - `GET /ga/analytics/content`
+    - `metrics`: `screenPageViews,screenPageViewsPerSession,screenPageViewsPerUser,bounceRate`
+    - `dimensions`: `date,pageTitle,pagePath`
+  - `GET /ga/analytics/ads` (advertiser)
+    - `metrics`: `advertiserAdClicks,advertiserAdImpressions,advertiserAdCost,advertiserAdCostPerClick`
+    - `dimensions`: `date,campaignName,campaignId`
+    - Compatibilidade: métricas `publisher*` e dimensões de inventário não são permitidas aqui.
+  - `GET /ga/analytics/promotions`
+    - `metrics`: `promotionViews,promotionClicks,itemPromotionClickThroughRate,itemsClickedInPromotion,itemsViewedInPromotion,itemListViewEvents,itemListClickEvents,itemListClickThroughRate,itemsClickedInList`
+    - `dimensions`: `date,sessionDefaultChannelGroup`
+  - `GET /ga/analytics/ecommerce/items`
+    - `metrics`: `itemsPurchased,itemsViewed,itemsAddedToCart,itemsCheckedOut,itemRevenue,itemDiscountAmount,grossItemRevenue`
+    - `dimensions`: `date,itemId,itemName,itemCategory`
+  - `GET /ga/analytics/ecommerce/revenue`
+    - `metrics`: `ecommercePurchases,purchaseRevenue,grossPurchaseRevenue,totalRevenue,transactions,transactionsPerPurchaser,averagePurchaseRevenue,averagePurchaseRevenuePerPayingUser,averagePurchaseRevenuePerUser,averageRevenuePerUser,purchaserRate,firstTimePurchasers,firstTimePurchaserRate,firstTimePurchasersPerNewUser`
+    - `dimensions`: `date,sessionDefaultChannelGroup`
+  - `GET /ga/analytics/ecommerce/funnel`
+    - `metrics`: `addToCarts,checkouts,ecommercePurchases,cartToViewRate,purchaseToViewRate`
+    - `dimensions`: `date,sessionDefaultChannelGroup`
+- Parâmetros comuns:
+  - `start_date`, `end_date` (ISO `YYYY-MM-DD`, default: últimos 30 dias)
+  - `limit` (default `1000`), `offset` (default `0`)
+- Compatibilidade e batching:
+  - Validação de combinações métricas/dimensões conforme schema GA4.
+  - GA impõe até 10 métricas por requisição; o serviço quebra em lotes e mescla os resultados.
+- Rotas removidas:
+  - `/ga/analytics/ecommerce` (genérica) e `/ga/analytics/report` (genérica).
+  - `/ga/analytics/search` removida por ausência de vínculo Search Console (erros `organicGoogleSearch*`).
+- Exemplos:
+```
+# Engajamento
+curl -H "Authorization: Bearer <jwt>" "http://localhost:8000/ga/analytics/engagement?metrics=engagedSessions,engagementRate&dimensions=date,deviceCategory&start_date=2025-11-01&end_date=2025-12-01"
+
+# E-commerce Itens
+curl -H "Authorization: Bearer <jwt)" "http://localhost:8000/ga/analytics/ecommerce/items?metrics=itemsPurchased,itemsViewed&dimensions=date,itemId,itemName"
+
+# Ads (advertiser)
+curl -H "Authorization: Bearer <jwt)" "http://localhost:8000/ga/analytics/ads?metrics=advertiserAdClicks,advertiserAdImpressions&dimensions=date,campaignName,campaignId"
+```
+
 
 ## Usuários e Autenticação
 - Registro: `POST /user/register` cria usuário com `name`, `email`, `password`, `role` (`api\\endpoints\\user.py:16-25`).

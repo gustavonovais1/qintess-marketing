@@ -20,4 +20,5 @@ def get_session():
 with engine.begin() as conn:
     conn.execute(text("CREATE SCHEMA IF NOT EXISTS instagram"))
     conn.execute(text("CREATE SCHEMA IF NOT EXISTS linkedin"))
+    conn.execute(text('CREATE SCHEMA IF NOT EXISTS "google_analytics"'))
     conn.execute(text('CREATE SCHEMA IF NOT EXISTS "user"'))
