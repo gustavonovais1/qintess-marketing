@@ -12,7 +12,6 @@ app.include_router(api_router)
 def main():
     import os
     import uvicorn
-    Base.metadata.create_all(bind=engine)
     port = int(os.environ.get("PORT") or 8000)
     uvicorn.run("main:app", host="0.0.0.0", port=port, log_level="info")
 

@@ -13,12 +13,6 @@ def _get_env(name, default=None):
 def _session():
     return get_session()
 
-def _ensure_orm_tables():
-    try:
-        Base.metadata.create_all(bind=engine)
-    except Exception:
-        pass
-
 def _month_period_string(dt):
     name = calendar.month_name[dt.month].lower()
     return f"{name}/{dt.year}"
@@ -386,7 +380,7 @@ def _process_visitors(df, s):
 
 def ingest_downloads(downloads_dir):
     s = _session()
-    _ensure_orm_tables()
+    # _ensure_orm_tables() removido - core/db.py ja faz isso
     files = []
     try:
         for name in os.listdir(downloads_dir):

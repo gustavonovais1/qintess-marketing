@@ -22,3 +22,9 @@ with engine.begin() as conn:
     conn.execute(text("CREATE SCHEMA IF NOT EXISTS linkedin"))
     conn.execute(text('CREATE SCHEMA IF NOT EXISTS "google_analytics"'))
     conn.execute(text('CREATE SCHEMA IF NOT EXISTS "user"'))
+    conn.execute(text('CREATE SCHEMA IF NOT EXISTS "rd_station"'))
+
+from models import *
+
+# Criar todas as tabelas no banco de dados
+Base.metadata.create_all(bind=engine)

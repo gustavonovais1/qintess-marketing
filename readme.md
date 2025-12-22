@@ -111,10 +111,35 @@ Principais endpoints:
 curl -H "Authorization: Bearer <jwt>" "http://localhost:8000/ga/analytics/engagement?metrics=engagedSessions,engagementRate&dimensions=date,deviceCategory&start_date=2025-11-01&end_date=2025-12-01"
 
 # E-commerce Itens
-curl -H "Authorization: Bearer <jwt)" "http://localhost:8000/ga/analytics/ecommerce/items?metrics=itemsPurchased,itemsViewed&dimensions=date,itemId,itemName"
+curl -H "Authorization: Bearer <jwt>" "http://localhost:8000/ga/analytics/ecommerce/items?metrics=itemsPurchased,itemsViewed&dimensions=date,itemId,itemName"
 
 # Ads (advertiser)
-curl -H "Authorization: Bearer <jwt)" "http://localhost:8000/ga/analytics/ads?metrics=advertiserAdClicks,advertiserAdImpressions&dimensions=date,campaignName,campaignId"
+curl -H "Authorization: Bearer <jwt>" "http://localhost:8000/ga/analytics/ads?metrics=advertiserAdClicks,advertiserAdImpressions&dimensions=date,campaignName,campaignId"
+```
+
+
+## RD Station Marketing
+- Prefixo: `/rd`. Endpoints sob `/rd/*` (autenticados, exceto callback).
+- Variáveis de ambiente obrigatórias: `RD_ACCOUNT_ID`, `RD_CLIENT_SECRET`.
+- Fluxo OAuth 2.0:
+  1. Acesse `GET /rd/auth` no navegador. Isso redirecionará para o login do RD Station.
+  2. Após autorizar, o RD Station redirecionará para `http://localhost:8000/rd/oauth/callback` com o código.
+  3. O sistema captura o `code`, troca pelo `access_token` e salva no banco de dados (`rd_station.rd_tokens`).
+- Endpoints principais:
+  - `GET /rd/auth` — Inicia o processo de autenticação (redirecionamento).
+  - `GET /rd/oauth/callback` — Recebe o código de autorização do RD Station (automático).
+  - `GET /rd/analytics/emails` — Métricas de performance de e-mail (envios, aberturas, cliques). Os dados são persistidos no banco (`rd_station.email_analytics`).
+  - `GET /rd/analytics/conversions` — Métricas de conversão e geração de leads por período. Os dados são persistidos no banco (`rd_station.conversion_analytics`).
+  - `GET /rd/segmentations` — Lista todas as segmentações de contatos. Os dados são persistidos no banco (`rd_station.segmentations`).
+  - `GET /rd/landing_pages` — Lista as Landing Pages ativas. Os dados são persistidos no banco (`rd_station.landing_pages`).
+  - `GET /rd/workflows` — Lista os fluxos de automação. Os dados são persistidos no banco (`rd_station.workflows`).
+- Exemplos:
+```
+# Analytics de E-mail
+curl -H "Authorization: Bearer <jwt>" "http://localhost:8000/rd/analytics/emails?start_date=2025-10-01&end_date=2025-10-31"
+
+# Listar Segmentações
+curl -H "Authorization: Bearer <jwt>" "http://localhost:8000/rd/segmentations"
 ```
 
 

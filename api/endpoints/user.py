@@ -7,13 +7,6 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter()
 
-@router.on_event("startup")
-def _ensure_tables():
-    try:
-        Base.metadata.create_all(bind=engine)
-    except Exception:
-        pass
-
 @router.post("/register")
 def register(name: str = Body(...), email: str = Body(...), password: str = Body(...), role: str = Body("user")):
     s = get_session()

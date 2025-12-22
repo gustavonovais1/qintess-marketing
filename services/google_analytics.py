@@ -127,12 +127,6 @@ class GA4Service:
         self.property_id = property_id
         self.client = BetaAnalyticsDataClient()
 
-    def ensure_tables(self):
-        try:
-            Base.metadata.create_all(bind=engine)
-        except Exception:
-            pass
-
     def list_presets(self) -> List[str]:
         return list(self.PRESETS.keys())
 
