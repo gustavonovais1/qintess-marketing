@@ -7,7 +7,7 @@ class InsightsProfile(Base):
     __tablename__ = "insights_profile"
     __table_args__ = {"schema": "instagram"}
 
-    ig_account_id = Column(Integer, primary_key=True)
+    ig_account_id = Column(BigInteger, primary_key=True)
     year = Column(Integer, primary_key=True)
     month = Column(Integer, primary_key=True)
 
